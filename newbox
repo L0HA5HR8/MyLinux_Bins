@@ -1,0 +1,131 @@
+#!/bin/bash
+
+# I understand how simple this is, but I found myself making
+# so many of the same folders and running the same scans.
+# I had to make some of it move faster and keep my focus on
+# the machine I was working with instead of making directories
+# and typing in Nmap scans...
+
+# !!!DO NOT RUN AS ROOT!!!
+
+# *** READ INSTRUCTIONS BEFORE USE  ***
+
+# Run in-place with ./NewBox.sh NOT AS ROOT or sudo!!!
+# If moved to /bin || /sbin, changed name to newbox and given 755...
+# sudo chmod 755 ./NewBox.sh && mv ./NewBox.sh newbox 
+# sudo cp newbox /bin && sudo mv newbox /sbin
+# ...run with: newbox
+
+# Script will ask for name and IP. Once you provide these, IP variable 
+# will be set to target IP. Then you will be prompted for sudo password
+# It is done this way intentially to avoid labeling dirs and files as root.
+
+# Once completed, you will be in $Box dir and ready to read results and 
+# begin to do further scanning and enummeration.
+
+# Set the NAME and IP variables
+echo -n "What is the name of the new box?: "
+read Box
+echo -n "What is the IP address of $Box?: "
+read IP 
+echo $(IP=$IP)
+sudo echo " "
+
+# Make folders for work, notes & scans etc. and move into it...
+mkdir ./$Box ./$Box/Scans ./$Box/Scans/Nmap ./$Box/Scans/Dirs ./$Box/Resources ./$Box/Resources/ScreenShots ./$Box/Resources/Scripts && cd $Box
+
+# Create notes' file to record everything.
+echo "#         $Box    $IP" > $Box.md
+echo " " >> $Box.md
+echo "# Enummeration" >> $Box.md
+echo " " >> $Box.md
+echo "# Resources" >> $Box.md
+echo " " >> $Box.md
+echo "# Exploits" >> $Box.md
+echo " " >> $Box.md
+echo "# PostEx Enum" >> $Box.md
+echo " " >> $Box.md
+echo "# PrivEsc" >> $Box.md
+echo " " >> $Box.md
+echo "# Notes" >> $Box.md
+echo " " >> $Box.md
+echo "##                End     ##" >> $Box.md
+
+# Create final outline for write up.
+touch "$Box.Outline.md"
+echo "#         $Box $IP" > "$Box.Outline.md"
+echo " " >> $Box.Outline.md
+echo "# Enummeration" >> $Box.Outline.md
+echo " " >> $Box.Outline.md
+echo "# Resources" >> $Box.Outline.md
+echo " " >> $Box.Outline.md
+echo "# Exploits" >> $Box.Outline.md
+echo " " >> $Box.Outline.md
+echo "# PostEx Enum" >> $Box.Outline.md
+echo " " >> $Box.Outline.md
+echo "# PrivEsc" >> $Box.Outline.md
+echo " " >> $Box.Outline.md
+echo "##                End     ##" >> $Box.Outline.md
+
+# Markdown files are set to open in SublimeText. If you
+# don't have sublimetext, open in your text editor of choice.
+# subl = (SublimeText) code = (VSCode) or atom = (Atom)
+# Open markdown files to begin note taking.
+subl $Box.Outline.md
+subl $Box.md
+
+
+# Move into Scan folder and start scanning...
+cd Scans/Nmap
+
+# Scan for open services with no ping, output normal & xml.
+sudo nmap -sV -Pn -T4 -vvv -oN Nmap -oX Nmap.xml $IP
+
+# Scan for usable scripts with no ping, output normal & xml.
+sleep 2 && sudo nmap -sC -Pn -T4 -vvv -oN Scripts -oX Scripts.xml $IP
+
+# Test script with this nmap scan...
+# and make sure to comment out all other nmap scans...
+# sudo nmap -sn -T4 -oN Nothing $IP
+
+echo " "
+echo " "
+echo "	...Nmap scan completed..."
+echo " "
+echo " "
+sleep 3 && echo "	...Now take a breath..."
+echo " "
+echo " "
+sleep 5 && echo "	...finishing up..."
+echo " "
+echo " "
+sleep 5 && echo "	...One more scan..."
+echo " "
+echo " "
+
+# Test script with this nmap scan...
+# sleep 5 && sudo nmap -sn -T4 -oN Nothing2 $IP
+
+# Scanning for OS fingerprint with no ping, output normal and xml.
+sleep 2 && sudo nmap -O -sC -Pn -T4 -vvv -oN Fingerprint -oX Fingerprint.xml $IP
+
+echo " "
+echo " "
+echo "-------------------------------------------------------------------------"
+echo "     Directories made, scans started, EXPLOIT $IP!!!                     "
+echo "          Save everything, screenshot it all! Try Harder!!!              "
+echo "-------------------------------------------------------------------------"
+echo " "
+echo " "
+
+# Translating xml Nmap files to readable HTML to open in browser.
+# These are great for making your final report.
+sleep 1 && xsltproc Nmap.xml -o Nmap.html
+sleep 1 && xsltproc Fingerprint.xml -o Fingerprint.html
+sleep 1 && xsltproc Scripts.xml -o Scripts.html
+
+# Just to make sure nothing is root only.
+# cd ../.. && sudo chmod -R 755 $Box
+
+sleep 2 && echo "	***  Start Hacking!!!  ***"
+#--Now you can start your other scans
